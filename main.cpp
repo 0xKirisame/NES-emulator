@@ -1,31 +1,36 @@
 #include <iostream>
 #include "cpu.h"
 
-int main() {
+int main(int argc, char* argv[]) {
 
- CPU cpu;
+  if (argc < 2) {
+      std::cout << "Usage: ./nes-emu <rom.nes>\n";
+      return 1;
+  }
+    
+  CPU cpu;
 
- cpu.memory[0x0000] = 0xA9;
- cpu.memory[0x0001] = 0x42;
- cpu.memory[0x0002] = 0x8D;
- cpu.memory[0x0003] = 0x00;
- cpu.memory[0x0004] = 0x02;
- cpu.memory[0x0005] = 0x4c;
- cpu.memory[0x0006] = 0x00;
- cpu.memory[0x0007] = 0x00;
+  if (!cpu.loadROM(argv[1])) {
+      std::cout << "Failed to load ROM\n";
+      return 1;
+  }
+  std::cout << "ROM loaded\n";
 
- 
- cpu.memory[0xFFFC] = 0x00;
- cpu.memory[0xFFFD] = 0x00;
+  cpu.memory[0xFFFC] = 0x00;  // force PC to start at 0xC000
+  cpu.memory[0xFFFD] = 0xC0;
 
- cpu.reset();
+  cpu.reset();
+  std::cout << "PC after reset: " << std::hex << cpu.PC << "\n";
+    
+  // run 1000 steps and see what happens
+  for (int i = 0; i < 10000; i++) {
+      cpu.step();
+  }
   
- cpu.step(); std::cout << "PC: " << std::hex << cpu.PC << "\n";
- cpu.step(); std::cout << "PC: " << std::hex << cpu.PC << "\n";
- cpu.step(); std::cout << "PC: " << std::hex << cpu.PC << "\n";
- cpu.step(); std::cout << "PC: " << std::hex << cpu.PC << "\n";
+  std::cout << "Test result at 0x02: " << std::hex << (int)cpu.memory[0x02] << "\n";
+  std::cout << "PC: " << std::hex << cpu.PC << "\n";
+  std::cout << "A: " << std::hex << (int)cpu.A << "\n";
 
- std::cout << std::hex << (int)cpu.memory[0x0200] << std::endl;
 
  return 0;
 
